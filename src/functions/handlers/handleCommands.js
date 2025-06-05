@@ -21,19 +21,25 @@ module.exports = (client) => {
     }
 
     const clientId = process.env.clientId;
-    const guildId = process.env.guildId;
     const rest = new REST({ version: "9" }).setToken(process.env.token);
 
     try {
-      console.log("Started refreshing application (/) commands");
+      console.log("Started refreshing GLOBAL application (/) commands");
+      console.log(
+        "Note: Global commands may take up to 1 hour to update across all servers"
+      );
 
-      await rest.put(Routes.applicationGuildCommands(clientId, guildId), {
+      // Register commands globally - works on all servers where bot is invited
+      await rest.put(Routes.applicationCommands(clientId), {
         body: client.commandArray,
       });
 
-      console.log("Succesfully reloaded appliaction / commands.");
+      console.log("Successfully registered GLOBAL application (/) commands.");
+      console.log(
+        "Commands will work on ALL servers where the bot is invited!"
+      );
     } catch (error) {
-      console.error(error);
+      console.error("Error registering commands:", error);
     }
   };
 };

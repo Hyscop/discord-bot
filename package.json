@@ -10,11 +10,18 @@
   "author": "Hyscop",
   "license": "ISC",
   "dependencies": {
+    "@discordjs/opus": "^0.10.0",
     "@discordjs/rest": "^2.3.0",
+    "@discordjs/voice": "^0.18.0",
+    "@distube/soundcloud": "^2.0.4",
+    "@distube/youtube": "^1.0.4",
     "chalk": "^4.1.2",
     "discord-api-types": "^0.37.92",
+    "discord-bot": "file:",
     "discord.js": "^14.15.3",
-    "dotenv": "^16.4.5"
+    "distube": "^5.0.7",
+    "dotenv": "^16.4.5",
+    "ffmpeg-static": "^5.2.0"
   },
   "devDependencies": {
     "eslint": "^9.6.0"
