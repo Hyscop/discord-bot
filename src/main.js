@@ -26,7 +26,6 @@ client.distube = new DisTube(client, {
     path: ffmpeg,
   },
   plugins: [new YouTubePlugin(), new SoundCloudPlugin(), new SpotifyPlugin()],
-  youtubeDL: false,
   ytdlOptions: {
     highWaterMark: 1024 * 1024 * 64,
   },
