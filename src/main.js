@@ -5,6 +5,7 @@ const fs = require("fs");
 const { DisTube } = require("distube");
 const { YouTubePlugin } = require("@distube/youtube");
 const { SoundCloudPlugin } = require("@distube/soundcloud");
+const { SpotifyPlugin } = require("@distube/spotify");
 const ffmpeg = require("ffmpeg-static");
 
 const client = new Client({
@@ -24,7 +25,11 @@ client.distube = new DisTube(client, {
   ffmpeg: {
     path: ffmpeg,
   },
-  plugins: [new YouTubePlugin(), new SoundCloudPlugin()],
+  plugins: [
+    new YouTubePlugin(), 
+    new SoundCloudPlugin(),
+    new SpotifyPlugin()
+  ],
 });
 
 const { EmbedBuilder } = require("discord.js");
@@ -137,8 +142,7 @@ client.distube
 
       queue.textChannel.send({ embeds: [embed] });
     }
-  })
-  .on("error", (queue, error) => {
+  })  .on("error", (queue, error) => {
     console.error("DisTube Error:", error);
     if (queue && queue.textChannel) {
       const errorEmbed = new EmbedBuilder()
@@ -148,6 +152,34 @@ client.distube
 
       queue.textChannel.send({ embeds: [errorEmbed] });
     }
+  })
+  .on("addList", (queue, playlist) => {
+    const embed = new EmbedBuilder()
+      .setColor(0x1db954) // Spotify green color
+      .setTitle("📋 Playlist Added")
+      .setDescription(`**${playlist.name}**`)
+      .addFields(
+        {
+          name: "👤 Requested by",
+          value: playlist.user.toString(),
+          inline: true,
+        },
+        {
+          name: "🎵 Songs",
+          value: `${playlist.songs.length} songs`,
+          inline: true,
+        },
+        {
+          name: "⏱️ Duration",
+          value: playlist.formattedDuration,
+          inline: true,
+        }
+      )
+      .setThumbnail(playlist.thumbnail)
+      .setTimestamp()
+      .setFooter({ text: "HyBot" });
+
+    queue.textChannel.send({ embeds: [embed] });
   });
 
 const functionFolders = fs.readdirSync(`./src/functions`);
