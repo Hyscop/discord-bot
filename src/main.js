@@ -25,11 +25,7 @@ client.distube = new DisTube(client, {
   ffmpeg: {
     path: ffmpeg,
   },
-  plugins: [
-    new YouTubePlugin(), 
-    new SoundCloudPlugin(),
-    new SpotifyPlugin()
-  ],
+  plugins: [new YouTubePlugin(), new SoundCloudPlugin(), new SpotifyPlugin()],
 });
 
 const { EmbedBuilder } = require("discord.js");
@@ -142,7 +138,8 @@ client.distube
 
       queue.textChannel.send({ embeds: [embed] });
     }
-  })  .on("error", (queue, error) => {
+  })
+  .on("error", (queue, error) => {
     console.error("DisTube Error:", error);
     if (queue && queue.textChannel) {
       const errorEmbed = new EmbedBuilder()

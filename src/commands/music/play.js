@@ -1,12 +1,15 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
-module.exports = {  data: new SlashCommandBuilder()
+module.exports = {
+  data: new SlashCommandBuilder()
     .setName("play")
     .setDescription("Play music from YouTube, Spotify, or SoundCloud")
     .addStringOption((option) =>
       option
         .setName("query")
-        .setDescription("Song name, YouTube/Spotify/SoundCloud URL, or Spotify playlist link")
+        .setDescription(
+          "Song name, YouTube/Spotify/SoundCloud URL, or Spotify playlist link"
+        )
         .setRequired(true)
     ),
 
@@ -25,23 +28,24 @@ module.exports = {  data: new SlashCommandBuilder()
               .setDescription("You must be in a voice channel to play music!"),
           ],
           ephemeral: true,
-        });      }
-      
+        });
+      }
+
       // Determine the type of input for better search messages
       let searchMessage = `Looking for: **${query}**`;
-      if (query.includes('spotify.com')) {
-        if (query.includes('/playlist/')) {
+      if (query.includes("spotify.com")) {
+        if (query.includes("/playlist/")) {
           searchMessage = `🎵 Loading Spotify playlist...`;
         } else {
           searchMessage = `🎵 Loading Spotify track...`;
         }
-      } else if (query.includes('youtube.com') || query.includes('youtu.be')) {
-        if (query.includes('/playlist')) {
+      } else if (query.includes("youtube.com") || query.includes("youtu.be")) {
+        if (query.includes("/playlist")) {
           searchMessage = `📺 Loading YouTube playlist...`;
         } else {
           searchMessage = `📺 Loading YouTube video...`;
         }
-      } else if (query.includes('soundcloud.com')) {
+      } else if (query.includes("soundcloud.com")) {
         searchMessage = `🔊 Loading SoundCloud track...`;
       } else {
         searchMessage = `🔍 Searching YouTube for: **${query}**`;
