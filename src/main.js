@@ -26,14 +26,6 @@ client.distube = new DisTube(client, {
     path: ffmpeg,
   },
   plugins: [new YouTubePlugin(), new SoundCloudPlugin(), new SpotifyPlugin()],
-  ytdlOptions: {
-    highWaterMark: 1024 * 1024 * 64,
-  },
-  searchSongs: 1,
-  searchCooldown: 30,
-  leaveOnEmpty: true,
-  leaveOnFinish: false,
-  leaveOnStop: false,
 });
 
 const { EmbedBuilder } = require("discord.js");
