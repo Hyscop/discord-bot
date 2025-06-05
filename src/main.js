@@ -26,6 +26,15 @@ client.distube = new DisTube(client, {
     path: ffmpeg,
   },
   plugins: [new YouTubePlugin(), new SoundCloudPlugin(), new SpotifyPlugin()],
+  youtubeDL: false,
+  ytdlOptions: {
+    highWaterMark: 1024 * 1024 * 64,
+  },
+  searchSongs: 1,
+  searchCooldown: 30,
+  leaveOnEmpty: true,
+  leaveOnFinish: false,
+  leaveOnStop: false,
 });
 
 const { EmbedBuilder } = require("discord.js");
@@ -109,8 +118,7 @@ client.distube
         }, 1000);
       }
     }
-  })
-  .on("addSong", (queue, song) => {
+  })  .on("addSong", (queue, song) => {
     if (queue.songs.length > 1) {
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
@@ -137,17 +145,6 @@ client.distube
         .setTimestamp();
 
       queue.textChannel.send({ embeds: [embed] });
-    }
-  })
-  .on("error", (queue, error) => {
-    console.error("DisTube Error:", error);
-    if (queue && queue.textChannel) {
-      const errorEmbed = new EmbedBuilder()
-        .setColor(0xff0000)
-        .setTitle("❌ Music Error")
-        .setDescription("An error occurred while playing music!");
-
-      queue.textChannel.send({ embeds: [errorEmbed] });
     }
   })
   .on("addList", (queue, playlist) => {
@@ -177,6 +174,23 @@ client.distube
       .setFooter({ text: "HyBot" });
 
     queue.textChannel.send({ embeds: [embed] });
+  })
+  .on("error", (channel, error) => {
+    console.error("DisTube Error Details:");
+    console.error("- Error name:", error.name);
+    console.error("- Error message:", error.message);
+    console.error("- Error stack:", error.stack);
+    
+    const embed = new EmbedBuilder()
+      .setColor(0xff0000)
+      .setTitle("❌ Music Error")
+      .setDescription(`An error occurred: ${error.message || 'Unknown error'}`)
+      .setTimestamp()
+      .setFooter({ text: "HyBot" });
+
+    if (channel && channel.send) {
+      channel.send({ embeds: [embed] });
+    }
   });
 
 const functionFolders = fs.readdirSync(`./src/functions`);
