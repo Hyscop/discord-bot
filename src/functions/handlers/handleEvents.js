@@ -18,8 +18,11 @@ module.exports = (client) => {
           client.on(event.name, (...args) => event.execute(...args, client));
         }
       } else {
-        // Handle other types of events if needed
-        console.warn(`Unknown event folder: ${folder}`);
+        if (event.once) {
+          client.once(event.name, (...args) => event.execute(...args, client));
+        } else {
+          client.on(event.name, (...args) => event.execute(...args, client));
+        }
       }
     }
   }

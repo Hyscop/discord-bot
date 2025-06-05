@@ -18,7 +18,8 @@ const client = new Client({
 client.commands = new Collection();
 client.commandArray = [];
 
-// Initialize DisTube with minimal FFmpeg configuration
+client.loopCounts = new Map();
+
 client.distube = new DisTube(client, {
   ffmpeg: {
     path: ffmpeg,
@@ -26,24 +27,126 @@ client.distube = new DisTube(client, {
   plugins: [new YouTubePlugin(), new SoundCloudPlugin()],
 });
 
-// DisTube event listeners - MINIMAL VERSION
+const { EmbedBuilder } = require("discord.js");
+
 client.distube
   .on("playSong", (queue, song) => {
-    queue.textChannel.send(
-      `🎵 Playing **${song.name}** - Requested by ${song.user}`
-    );
+    let loopStatus = "❌ Off";
+    if (queue.repeatMode === 1) loopStatus = "🔁 Song";
+    else if (queue.repeatMode === 2) loopStatus = "🔁 Queue";
+
+    let loopInfo = loopStatus;
+    if (
+      client.loopCounts &&
+      client.loopCounts.has(queue.voiceChannel.guild.id)
+    ) {
+      const loopData = client.loopCounts.get(queue.voiceChannel.guild.id);
+      loopInfo += ` (${loopData.current}/${loopData.count})`;
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0x00ff00)
+      .setTitle("🎵 Now Playing")
+      .setDescription(`**[${song.name}](${song.url})**`)
+      .addFields(
+        {
+          name: "👤 Requested by",
+          value: song.user.toString(),
+          inline: true,
+        },
+        {
+          name: "⏱️ Duration",
+          value: song.formattedDuration,
+          inline: true,
+        },
+        {
+          name: "🔊 Volume",
+          value: `${queue.volume}%`,
+          inline: true,
+        },
+        {
+          name: "🎤 Artist/Channel",
+          value: song.uploader?.name || "Unknown",
+          inline: true,
+        },
+        {
+          name: "🔁 Loop Mode",
+          value: loopInfo,
+          inline: true,
+        },
+        {
+          name: "📋 Queue",
+          value: `${queue.songs.length} songs`,
+          inline: true,
+        }
+      )
+      .setThumbnail(song.thumbnail)
+      .setTimestamp()
+      .setFooter({ text: "HyBot" });
+
+    queue.textChannel.send({ embeds: [embed] });
+
+    if (
+      client.loopCounts &&
+      client.loopCounts.has(queue.voiceChannel.guild.id)
+    ) {
+      const loopData = client.loopCounts.get(queue.voiceChannel.guild.id);
+      loopData.current++;
+
+      if (loopData.current >= loopData.count) {
+        client.distube.setRepeatMode(queue, 0);
+        client.loopCounts.delete(queue.voiceChannel.guild.id);
+
+        setTimeout(() => {
+          const endEmbed = new EmbedBuilder()
+            .setColor(0xffd700)
+            .setTitle("🔁 Loop Completed")
+            .setDescription(
+              `Loop limit of **${loopData.count}** reached. Loop mode disabled.`
+            );
+          queue.textChannel.send({ embeds: [endEmbed] });
+        }, 1000);
+      }
+    }
   })
   .on("addSong", (queue, song) => {
     if (queue.songs.length > 1) {
-      queue.textChannel.send(
-        `➕ Added **${song.name}** to the queue`
-      );
+      const embed = new EmbedBuilder()
+        .setColor(0x0099ff)
+        .setTitle("➕ Added to Queue")
+        .setDescription(`**[${song.name}](${song.url})**`)
+        .addFields(
+          {
+            name: "👤 Requested by",
+            value: song.user.toString(),
+            inline: true,
+          },
+          {
+            name: "⏱️ Duration",
+            value: song.formattedDuration,
+            inline: true,
+          },
+          {
+            name: "📋 Position",
+            value: `${queue.songs.length} in queue`,
+            inline: true,
+          }
+        )
+        .setThumbnail(song.thumbnail)
+        .setTimestamp();
+
+      queue.textChannel.send({ embeds: [embed] });
     }
   })
   .on("error", (queue, error) => {
     console.error("DisTube Error:", error);
     if (queue && queue.textChannel) {
-      queue.textChannel.send("❌ An error occurred while playing music!");
+      const errorEmbed = new EmbedBuilder()
+        .setColor(0xff0000)
+        .setTitle("❌ Music Error")
+        .setDescription("An error occurred while playing music!");
+
+      queue.textChannel.send({ embeds: [errorEmbed] });
     }
   });
 

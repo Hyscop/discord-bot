@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -19,28 +19,40 @@ module.exports = {
 
       if (!voiceChannel) {
         return await interaction.reply({
-          content: "❌ You must be in a voice channel to play music!",
+          embeds: [
+            new EmbedBuilder()
+              .setColor(0xff0000)
+              .setTitle("❌ Error")
+              .setDescription("You must be in a voice channel to play music!"),
+          ],
           ephemeral: true,
         });
       }
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0xffd700)
+            .setTitle("🔍 Searching...")
+            .setDescription(`Looking for: **${query}**`),
+        ],
+      });
 
-      await interaction.reply(`🔍 Searching for: **${query}**`);
-
-      // Simple DisTube play
       await client.distube.play(voiceChannel, query, {
         textChannel: interaction.channel,
         member: member,
       });
-
     } catch (error) {
       console.error("Play command error:", error);
-      
-      const errorMessage = "❌ Failed to play the song. Please try again.";
-      
+
+      const errorEmbed = new EmbedBuilder()
+        .setColor(0xff0000)
+        .setTitle("❌ Playback Error")
+        .setDescription("Failed to play the song. Please try again.");
+
       if (interaction.replied) {
-        await interaction.followUp({ content: errorMessage, ephemeral: true });
+        await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
       } else {
-        await interaction.reply({ content: errorMessage, ephemeral: true });
+        await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
       }
     }
   },
