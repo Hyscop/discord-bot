@@ -118,7 +118,8 @@ client.distube
         }, 1000);
       }
     }
-  })  .on("addSong", (queue, song) => {
+  })
+  .on("addSong", (queue, song) => {
     if (queue.songs.length > 1) {
       const embed = new EmbedBuilder()
         .setColor(0x0099ff)
@@ -180,11 +181,11 @@ client.distube
     console.error("- Error name:", error.name);
     console.error("- Error message:", error.message);
     console.error("- Error stack:", error.stack);
-    
+
     const embed = new EmbedBuilder()
       .setColor(0xff0000)
       .setTitle("❌ Music Error")
-      .setDescription(`An error occurred: ${error.message || 'Unknown error'}`)
+      .setDescription(`An error occurred: ${error.message || "Unknown error"}`)
       .setTimestamp()
       .setFooter({ text: "HyBot" });
 
